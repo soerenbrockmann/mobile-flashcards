@@ -1,24 +1,30 @@
 import React, { Component } from 'react';
 import {
-  Platform,
-  TouchableOpacity,
   StyleSheet,
   Text,
   FlatList,
-  View
+  View,
+  RefreshControl
 } from 'react-native';
-import { purple, white } from '../utils/colors';
+import { white } from '../utils/colors';
 import { getDecks } from '../utils/api';
 import DeckItem from './DeckItem';
 
 class DeckList extends Component {
   state = {
     decks: [],
+    refreshing: false
   };
 
-  componentDidMount() {
-    this.mapDecks();
+  async componentDidMount() {
+    await this.mapDecks();
   }
+
+  onRefresh = async () => {
+    await this.setState({ refreshing: true });
+    await this.mapDecks();
+    await this.setState({ refreshing: false });
+  };
 
   mapDecks = async () => {
     const decksResponse = await getDecks();
@@ -33,32 +39,34 @@ class DeckList extends Component {
 
   renderItem = ({ item }) => {
     const { navigation } = this.props;
-    // const shouldFetchDecks = () => this.setState({ shouldFetchDecks: true });
     return <DeckItem {...{ ...item, ...navigation }} />;
+  };
+
+  renderNotFoundItem = ({ item }) => {
+    return <Text style={styles.notFoundText}>{item.title}</Text>;
   };
 
   render() {
     const { decks } = this.state;
-    const { shouldRender = false } = this.props.navigation.state.params || {}
-    if (shouldRender) {
-      this.props.navigation.state.params.shouldRender = false
 
-      this.mapDecks();
-    }
     return (
       <View style={styles.container}>
-        {decks.length > 0 && (
-          <FlatList
-            data={decks}
-            renderItem={this.renderItem}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        )}
-        {decks.length < 1 && (
-          <Text style={{ fontSize: 24, textAlign: 'center' }}>
-            No decks found!
-          </Text>
-        )}
+        <FlatList
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={() => this.onRefresh()}
+            />
+          }
+          ListHeaderComponent={
+            <Text style={styles.listHeader}>Swipe down to refresh view!</Text>
+          }
+          data={decks.length < 1 ? [{ title: 'No decks found!' }] : decks}
+          renderItem={
+            decks.length < 1 ? this.renderNotFoundItem : this.renderItem
+          }
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
     );
   }
@@ -71,6 +79,16 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: white
   },
+  listHeader: {
+    alignSelf: 'center'
+  },
+  notFoundText: {
+    fontSize: 18,
+    marginTop: 50,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   input: {
     width: 200,
     height: 44,
@@ -78,30 +96,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#757575',
     margin: 50
-  },
-  iosSubmitButton: {
-    backgroundColor: purple,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    marginLeft: 40,
-    marginRight: 40
-  },
-  AndroidSubmitButton: {
-    backgroundColor: purple,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    borderRadius: 2,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  submitButtonText: {
-    color: white,
-    fontSize: 22,
-    textAlign: 'center'
   },
   center: {
     flex: 1,

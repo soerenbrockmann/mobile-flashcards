@@ -12,6 +12,7 @@ import AddDeck from './components/AddDeck';
 import DeckDetail from './components/DeckDetail';
 import AddCard from './components/AddCard';
 import Quiz from './components/Quiz';
+import { setLocalNotification } from "./utils/helper";
 
 const CustomStatusBar = ({ backgroundColor, ...props }) => {
   return (
@@ -103,7 +104,11 @@ const MainNavigator = createStackNavigator({
   },
 });
 
+
 export default class App extends React.Component {
+  componentDidMount() {
+    setLocalNotification();
+  }
   render() {
     return (
       <View style={{ flex: 1 }}>

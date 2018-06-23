@@ -1,13 +1,18 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableHighlight } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { getCards } from '../utils/api';
+import { gray, borderGray } from '../utils/colors';
 
 const DeckItem = (props) => {
   const key = Object.keys(props)[0];
   const { title, questions } = props[key];
   return (
-    <TouchableHighlight
+    <TouchableOpacity
       style={styles.button}
-      onPress={() => props.navigate('DeckDetail', { title, cardCount: questions.length })}
+      onPress={async () => { 
+        const deck = await getCards({ title });
+        await props.navigate('DeckDetail', { title, cardCount: deck.length })}
+      }
     >
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
@@ -15,7 +20,7 @@ const DeckItem = (props) => {
           {questions ? questions.length : 0} cards
         </Text>
       </View>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 };
 
@@ -24,8 +29,6 @@ export default DeckItem;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee'
   },
   title: {
     fontSize: 24,
@@ -35,10 +38,14 @@ const styles = StyleSheet.create({
   card: {
     fontSize: 18,
     textAlign: 'center',
-    padding: 5
+    padding: 5,
+    color: gray
   },
   button: {
     alignItems: 'center',
-    padding: 10
+    padding: 10,
+    alignSelf: "stretch",
+    borderBottomWidth: 1,
+    borderBottomColor: borderGray
   }
 });
