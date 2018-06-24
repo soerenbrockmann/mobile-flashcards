@@ -22,7 +22,7 @@ const DeckDetail = ({ navigation }) => {
         />
         <BasicButton
           onPress={() => navigation.navigate('Quiz', { title })}
-          text={'Start Quiz'}
+          text={'Start a Quiz'}
         />
       </View>
     </View>
